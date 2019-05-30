@@ -335,6 +335,28 @@ document.addEventListener("mousedown", function load(clicked) {
     }
 });
 
+document.addEventListener("focus", function load(clicked) {
+    if (clicked.target.id.indexOf("fxkey") !== -1) {
+        clicked.preventDefault();
+    }
+    var focus = document.activeElement;
+    console.log(focus);
+    console.log("clicked but no data");
+    if (focus.type in {
+        'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
+        'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
+        'datetime-local': '', 'email': '', 'month': '', 'number': '', 'range': '',
+        'search': '', 'tel': '', 'time': '', 'week': ''
+    } && fxKeyboard.lastPress !== "close") {
+        fxKeyboard._toggleOpen(true);
+    } else {
+        if (clicked.target.id.indexOf("fxkey") === -1) {
+            fxKeyboard._toggleOpen(false);
+            fxKeyboard.lastPress = "null";
+        }   
+    }
+},true);
+
 document.addEventListener("mouseup", function load(clicked) {
     if (clicked.target.id.indexOf("fxkey") !== -1) {
         clicked.preventDefault();
