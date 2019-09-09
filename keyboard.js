@@ -110,6 +110,7 @@ var fxKeyboard = {
     state: 0,
     lastPress: "null",
     keepOpen: false,
+    focusElement: null,
     
     _setSpecialFunctions: function(keyD,obj) {
         keyD.onmousedown = function(){keyD.style.backgroundColor = "rgb(150,150,150)";};
@@ -191,10 +192,11 @@ var fxKeyboard = {
         }
     },
     
-    _sendKey: function (char) {
-        var ele = document.activeElement;
-        var cval = ele.value;
-        ele.value = cval+char;
+    _sendKey: function (character) {
+        var cval = fxKeyboard.focusElement.value;
+        fxKeyboard.focusElement.value = cval+character;
+        fxKeyboard.focusElement.dispatchEvent(new Event('input',{'bubbles':true}));
+        console.log("firing change event");
     },
     
     _buildKey: function (char,primary) {
@@ -320,12 +322,36 @@ var fxKeyboard = {
         document.body.appendChild(keyb);
         this.settings.preScale = this.settings.scale;
         this._toggleOpen(false);
+    },
+    
+    raiseKeyboard: function () {
+        keyb = document.getElementById("fxkeyboard");
+        keyb.style.zIndex = "9999999";
+//        console.log(document.activeElement);
+        if (document.activeElement in {
+            'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
+            'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
+            'datetime-local': '', 'email': '', 'month': '', 'number': '', 'range': '',
+            'search': '', 'tel': '', 'time': '', 'week': ''} 
+                && fxKeyboard.lastPress !== "close") {
+            fxKeyboard._toggleOpen(true);
+        }
     }
 };
 
 browser.runtime.onMessage.addListener(function begin(message) {
     if (message === "insertKeyboard") {
+        console.log("inserting keyboard");
         fxKeyboard.insertKeyboard();
+        var mutationObserver = new MutationObserver(fxKeyboard.raiseKeyboard());
+        var container = document.documentElement || document.body;
+        mutationObserver.observe(container, {
+            attributes: true,
+            characterData: true,
+            childList: true,
+            subtree: true,
+            characterDataOldValue: true
+        });
     }
 });
 
@@ -340,8 +366,6 @@ document.addEventListener("focus", function load(clicked) {
         clicked.preventDefault();
     }
     var focus = document.activeElement;
-    console.log(focus);
-    console.log("clicked but no data");
     if (focus.type in {
         'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
         'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
@@ -351,6 +375,8 @@ document.addEventListener("focus", function load(clicked) {
         fxKeyboard._toggleOpen(true);
     } else {
         if (clicked.target.id.indexOf("fxkey") === -1) {
+            console.log("In focus listener");
+            console.log(clicked);
             fxKeyboard._toggleOpen(false);
             fxKeyboard.lastPress = "null";
         }   
@@ -362,17 +388,18 @@ document.addEventListener("mouseup", function load(clicked) {
         clicked.preventDefault();
     }
     var focus = document.activeElement;
-    console.log(focus);
-    console.log("clicked but no data");
     if (focus.type in {
         'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
         'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
         'datetime-local': '', 'email': '', 'month': '', 'number': '', 'range': '',
         'search': '', 'tel': '', 'time': '', 'week': ''
     } && fxKeyboard.lastPress !== "close") {
+        fxKeyboard.focusElement = document.activeElement;
         fxKeyboard._toggleOpen(true);
     } else {
         if (clicked.target.id.indexOf("fxkey") === -1) {
+            console.log("In mouseup listener");
+            console.log(clicked);
             fxKeyboard._toggleOpen(false);
             fxKeyboard.lastPress = "null";
         }   
