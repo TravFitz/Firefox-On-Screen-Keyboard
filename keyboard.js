@@ -196,7 +196,6 @@ var fxKeyboard = {
         var cval = fxKeyboard.focusElement.value;
         fxKeyboard.focusElement.value = cval+character;
         fxKeyboard.focusElement.dispatchEvent(new Event('input',{'bubbles':true}));
-        console.log("firing change event");
     },
     
     _buildKey: function (char,primary) {
@@ -327,7 +326,6 @@ var fxKeyboard = {
     raiseKeyboard: function () {
         keyb = document.getElementById("fxkeyboard");
         keyb.style.zIndex = "9999999";
-//        console.log(document.activeElement);
         if (document.activeElement in {
             'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
             'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
@@ -341,7 +339,6 @@ var fxKeyboard = {
 
 browser.runtime.onMessage.addListener(function begin(message) {
     if (message === "insertKeyboard") {
-        console.log("inserting keyboard");
         fxKeyboard.insertKeyboard();
         var mutationObserver = new MutationObserver(fxKeyboard.raiseKeyboard());
         var container = document.documentElement || document.body;
@@ -375,8 +372,6 @@ document.addEventListener("focus", function load(clicked) {
         fxKeyboard._toggleOpen(true);
     } else {
         if (clicked.target.id.indexOf("fxkey") === -1) {
-            console.log("In focus listener");
-            console.log(clicked);
             fxKeyboard._toggleOpen(false);
             fxKeyboard.lastPress = "null";
         }   
@@ -398,8 +393,6 @@ document.addEventListener("mouseup", function load(clicked) {
         fxKeyboard._toggleOpen(true);
     } else {
         if (clicked.target.id.indexOf("fxkey") === -1) {
-            console.log("In mouseup listener");
-            console.log(clicked);
             fxKeyboard._toggleOpen(false);
             fxKeyboard.lastPress = "null";
         }   
