@@ -196,6 +196,10 @@ var fxKeyboard = {
         var cval = fxKeyboard.focusElement.value;
         fxKeyboard.focusElement.value = cval+character;
         fxKeyboard.focusElement.dispatchEvent(new Event('input',{'bubbles':true}));
+        if (fxKeyboard.state === 1) {
+            fxKeyboard.state = 0;
+            fxKeyboard._setShift();
+        }
     },
     
     _buildKey: function (char,primary) {
