@@ -1,6 +1,6 @@
 /*
  FxKeyboard
- Version: 1.7.0
+ Version: 1.8.0
  Author:  Travis Fitzgerald
  Date:    6 May 2020
  Purpose: A virtual keyboard for Firefox
