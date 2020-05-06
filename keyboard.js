@@ -597,6 +597,18 @@ document.addEventListener("mouseup", function load(clicked) {
         clicked.preventDefault();
     }
 
+    oskAction(clicked);
+});
+
+document.addEventListener("focusin", function load(clicked) {
+    if (clicked.target.id.indexOf("fxkey") !== -1) {
+        clicked.preventDefault();
+    }
+
+    oskAction(clicked);
+});
+
+function oskAction(clicked) {
     if (document.activeElement.type in {
         'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
         'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
@@ -619,7 +631,7 @@ document.addEventListener("mouseup", function load(clicked) {
             fxKeyboard.lastPress = "null";
         }
     }
-});
+}
 
 document.addEventListener("dragstart", function load(clicked) {
     if (clicked.target.id.indexOf("fxkey") !== -1) {
