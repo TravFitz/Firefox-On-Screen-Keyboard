@@ -262,6 +262,11 @@ var fxKeyboard = {
             }
         }
     },
+	
+	_isOSKOpen: function() {
+		var kb = document.getElementById(this.activeOSK);
+		return kb != null ? kb.style.display === 'block' : false;
+	},
 
     /*
      states:
@@ -551,8 +556,15 @@ window.addEventListener("message", function messageReceived(event) {
     if (msg.directive === "slave") {
         switch (msg.command) {
             case "initialize":
+				var preOpen = fxKeyboard._isOSKOpen();
+				if (fxKeyboard.hierarchy.isMaster) {
+					fxKeyboard._toggleOpen(false);
+				}
                 fxKeyboard.hierarchy.isMaster = false;
                 fxKeyboard.hierarchy.pathInMaster = msg.xpath;
+				if (preOpen) {
+					fxKeyboard._toggleOpen(preOpen);
+				}
                 break;
             case "sendKey":
                 fxKeyboard._sendKey(msg.key);
