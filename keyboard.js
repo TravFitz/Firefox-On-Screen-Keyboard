@@ -1,10 +1,23 @@
 /*
  FxKeyboard
- Version: 1.8.0
+ Version: 1.10.0
  Author:  Travis Fitzgerald
- Date:    6 May 2020
+ Date:    19 March 2021
  Purpose: A virtual keyboard for Firefox
  */
+
+const storageData = browser.storage.local.get();
+
+storageData.then(storedSetup, onError);
+
+function storedSetup(settings) {
+	fxKeyboard.settings.scale = settings.scaleValue/100;
+	fxKeyboard.settings.numpadState = settings.numpadState;
+}
+
+function onError(error) {
+	console.log("Failed to get stored data from internal storage");
+}
 
 var xpath = {
     getXPathOfElement: function (elt)
@@ -80,8 +93,7 @@ var FxKeyboardLocale = '{'+
             '["k", "K"],'+
             '["l", "L"],'+
             '[";", ":"],'+
-            '["\'", "\\""],'+
-            '[{"label": "Enter", "flex": 15, "special": 13}]'+
+            '["\'", "\\""]'+
         '], ['+
             '[{"label": "Shift", "flex": 20, "special": "shift"}],'+
             '["z", "Z"],'+
@@ -204,14 +216,15 @@ var fxKeyboard = {
         locale_default: 'en',
         secScaleX: 0,
         secScaleY: 0,
-        scale: 0,
+        scale: 0.8,
+		numpadState: "auto",
         preScale: 0,
-        key_height: 55,
         padding: 8,
-        kb_max_width: 1065,
-        kb_max_height: 375,
+        kb_max_width: window.innerWidth,
+        kb_max_height: window.innerWidth*0.30,
         np_max_width: 220,
-        np_max_height: 375
+        np_max_height: 375,
+		key_height: window.innerWidth*0.05
     },
     
     hierarchy: {
@@ -330,7 +343,24 @@ var fxKeyboard = {
                 fxKeyboard._sendKey(obj.label);
                 keyD.style.backgroundColor = "rgb(255,255,255)";
             };
-        }
+        } else if (obj.label === "Tab") {
+			keyD.onmouseup = function () {
+				keyD.style.backgroundColor = "rgb(255,255,255)";
+				var focussableElements = 'input:not([disabled]), [tabindex]:not([disabled]):not([tabindex="-1"])';
+				console.log(document.activeElement);
+				console.log(document.activeElement.form);
+				if (document.activeElement && document.activeElement.form) {
+					var focussable = Array.prototype.filter.call(document.activeElement.form.querySelectorAll(focussableElements),
+							function (element) {
+								return element.offsetWidth > 0 || element.offsetHeight > 0 || element === document.activeElement
+							});
+					console.log(focussable);
+					var index = focussable.indexOf(document.activeElement);
+					focussable[index+1 >= focussable.length ?  0 : index+1].focus();
+				}
+			};
+		}
+			
         return keyD;
     },
     
@@ -450,14 +480,6 @@ var fxKeyboard = {
     },
 
     insertKeyboard: function (inputType) {
-        this.settings.setScaleX = window.innerWidth/1920;
-        this.settings.setScaleY = window.innerHeight/1080;
-        if (this.settings.setScaleX > this.settings.setScaleY) {
-            this.settings.scale = this.settings.setScaleX;
-        } else {
-            this.settings.scale = this.settings.setScaleY;
-        }
-        
         var keyb, max_width, max_height;
         switch (inputType) {
             case fxKeyboard.inputTypes.keyboard:
@@ -490,7 +512,7 @@ var fxKeyboard = {
         keyb.style.padding = this.settings.padding*this.settings.scale + "px";
         keyb.style.fontFamily = "arial,sans-serif";
         keyb.style.color = "#000000";
-        keyb.style.fontSize = 24*this.settings.scale+"pt";
+        keyb.style.fontSize = 35*this.settings.scale+"pt";
         keyb.style.borderRadius = 5*this.settings.scale+"px";
         keyb.style.textAlign = "center";
         keyb.style.position = "fixed"; 
@@ -620,21 +642,29 @@ document.addEventListener("focusin", function load(clicked) {
     oskAction(clicked);
 });
 
-function oskAction(clicked) {
-    if (document.activeElement.type in {
+var textInputTypes = {
         'input': '', 'select': '', 'option': '', 'textarea': '', 'textbox': '',
         'text': '', 'password': '', 'url': '', 'color': '', 'date': '', 'datetime': '',
         'datetime-local': '', 'email': '', 'month': '', 'search': ''
-    } && fxKeyboard.lastPress !== "close") {
+    };
+
+var integerInputTypes = {
+        'number': '', 'range': '', 'tel': '', 'time': '', 'week': ''
+    };
+
+function oskAction(clicked) {
+    if ((fxKeyboard.settings.numpadState === "disabled" ? document.activeElement.type in textInputTypes || document.activeElements.type in integerInputTypes : document.activeElement.type in textInputTypes)
+			&& fxKeyboard.lastPress !== "close" && fxKeyboard.settings.numpadState !== "always") {
         fxKeyboard.focusElement = document.activeElement;
         fxKeyboard.focusElementYTop = document.activeElement.getBoundingClientRect().top;
         fxKeyboard.focusElementYBottom = document.activeElement.getBoundingClientRect().bottom;
         fxKeyboard.activeOSK = fxKeyboard.inputTypes.keyboard;
         fxKeyboard._toggleOpen(true);
-    } else if (document.activeElement.type in {
-        'number': '', 'range': '', 'tel': '', 'time': '', 'week': ''
-    } && fxKeyboard.lastPress !== "close") {
+    } else if ((fxKeyboard.settings.numpadState === "always" ? document.activeElement.type in textInputTypes || document.activeElements.type in integerInputTypes : document.activeElement.type in integerInputTypes) 
+			&& fxKeyboard.lastPress !== "close" && fxKeyboard.settings.numpadState !== "disabled") {
         fxKeyboard.focusElement = document.activeElement;
+		fxKeyboard.focusElementYTop = document.activeElement.getBoundingClientRect().top;
+        fxKeyboard.focusElementYBottom = document.activeElement.getBoundingClientRect().bottom;
         fxKeyboard.activeOSK = fxKeyboard.inputTypes.numpad;
         fxKeyboard._toggleOpen(true);
     } else {

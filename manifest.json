@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "FX OSK",
-    "version": "1.9",
+    "version": "1.10",
     "description": "On-Screen Keyboard for FireFox",
     "icons": {
         "48": "icon.svg",
@@ -23,8 +23,14 @@
     "permissions": [
         "webRequest",
         "tabs",
+		"storage",
         "activeTab",
         "<all_urls>",
         "webNavigation"
-    ]
+    ],
+	
+	"options_ui": {
+		"page": "options/osk_settings.html",
+        "browser_style": true
+	}
 }
