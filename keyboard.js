@@ -1,8 +1,8 @@
 /*
  FxKeyboard
- Version: 1.10.0
+ Version: 1.10.1
  Author:  Travis Fitzgerald
- Date:    19 March 2021
+ Date:    23 March 2021
  Purpose: A virtual keyboard for Firefox
  */
 
@@ -11,6 +11,19 @@ const storageData = browser.storage.local.get();
 storageData.then(storedSetup, onError);
 
 function storedSetup(settings) {
+	if (!settings.hasOwnProperty("scaleValue") || settings.scaleValue === null) {
+		browser.storage.local.set({
+			scaleValue: 90,
+		});
+		settings.scaleValue = 90;
+	}
+	if (!settings.hasOwnProperty("numpadState") || settings.numpadState === null) {
+		browser.storage.local.set({
+			numpadState: "auto",
+		});
+		settings.numpadState = "auto"
+	}
+	
 	fxKeyboard.settings.scale = settings.scaleValue/100;
 	fxKeyboard.settings.numpadState = settings.numpadState;
 }
@@ -93,7 +106,8 @@ var FxKeyboardLocale = '{'+
             '["k", "K"],'+
             '["l", "L"],'+
             '[";", ":"],'+
-            '["\'", "\\""]'+
+            '["\'", "\\""],'+
+            '[{"label": "", "flex": 15, "special": 0}]'+
         '], ['+
             '[{"label": "Shift", "flex": 20, "special": "shift"}],'+
             '["z", "Z"],'+
@@ -340,8 +354,8 @@ var fxKeyboard = {
             };
         } else if (obj.label === "Enter") {
             keyD.onmouseup = function () {
-                fxKeyboard._sendKey(obj.label);
                 keyD.style.backgroundColor = "rgb(255,255,255)";
+				document.activeElement.form.submit();
             };
         } else if (obj.label === "Tab") {
 			keyD.onmouseup = function () {
