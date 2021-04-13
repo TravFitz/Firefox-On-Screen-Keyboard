@@ -109,7 +109,7 @@ var FxKeyboardLocale = '{'+
             '["l", "L"],'+
             '[";", ":"],'+
             '["\'", "\\""],'+
-            '[{"label": "", "flex": 15, "special": 0}]'+
+            '[{"label": "Enter", "flex": 15, "special": 13}]'+
         '], ['+
             '[{"label": "Shift", "flex": 10, "special": "shift"}],'+
             '["z", "Z"],'+
@@ -372,7 +372,7 @@ var fxKeyboard = {
         } else if (obj.label === "Enter") {
             keyD.onmouseup = function () {
                 keyD.style.backgroundColor = "rgb(255,255,255)";
-				document.activeElement.form.submit();
+				fxKeyboard._sendKey(obj.label);
             };
         } else if (obj.label === "Tab") {
 			keyD.onmouseup = function () {
